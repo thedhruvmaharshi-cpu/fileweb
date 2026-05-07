@@ -1,0 +1,101 @@
+.page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px; position: relative;
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.backLink {
+  position: absolute; top: 24px; left: 24px;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; color: var(--tx-m); padding: 8px 12px;
+  border-radius: 8px; transition: all 0.15s;
+}
+.backLink:hover { background: var(--surf); color: var(--tx); }
+
+.themeBtn {
+  position: absolute; top: 24px; right: 24px;
+  width: 36px; height: 36px; border-radius: 9px;
+  border: 0.5px solid var(--bd); background: var(--surf);
+  color: var(--tx-m); font-size: 15px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.themeBtn:hover { background: var(--surf-h); color: var(--tx); }
+
+.card {
+  width: 100%; max-width: 400px; padding: 40px 36px;
+  border-radius: 16px; border: 0.5px solid var(--bd-s);
+  background: var(--bg-2); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 8px; font-size: 16px;
+  font-weight: 600; color: var(--tx); margin-bottom: 32px;
+}
+.logoIcon {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: linear-gradient(135deg, #6C63FF, #4ECDC4);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.title { font-size: 24px; font-weight: 700; color: var(--tx); margin-bottom: 6px; letter-spacing: -0.4px; }
+.sub { font-size: 13px; color: var(--tx-m); margin-bottom: 28px; }
+
+.error {
+  width: 100%; padding: 11px 14px; border-radius: 9px; font-size: 12px;
+  background: var(--red-bg); color: var(--red);
+  border: 0.5px solid rgba(244,131,107,0.25);
+  margin-bottom: 18px; display: flex; align-items: center; gap: 7px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.googleBtn {
+  width: 100%; padding: 11px; border-radius: 10px; font-size: 13px;
+  font-weight: 500; display: flex; align-items: center; justify-content: center;
+  gap: 9px; border: 0.5px solid var(--bd-s); background: var(--surf);
+  color: var(--tx); transition: all 0.15s; margin-bottom: 22px;
+}
+.googleBtn:hover:not(:disabled) { background: var(--surf-h); border-color: var(--tx-s); }
+.googleBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.googleBtn i { font-size: 16px; }
+
+.divider {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px; color: var(--tx-s); font-size: 11px;
+}
+.divider::before, .divider::after {
+  content: ""; flex: 1; height: 0.5px; background: var(--bd);
+}
+
+.form { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.fieldHeader { display: flex; justify-content: space-between; align-items: center; }
+.fieldToggle { font-size: 11px; color: var(--tx-m); padding: 0; }
+.fieldToggle:hover { color: var(--accent); }
+
+.field label { font-size: 12px; color: var(--tx-m); font-weight: 500; }
+.field input {
+  padding: 11px 13px; border-radius: 9px; font-size: 13px;
+  border: 0.5px solid var(--bd); background: var(--surf);
+  color: var(--tx); outline: none; transition: all 0.15s;
+}
+.field input:focus { border-color: var(--accent); background: var(--bg); }
+.field input::placeholder { color: var(--tx-s); }
+
+.submitBtn {
+  width: 100%; padding: 12px; border-radius: 10px; font-size: 13px;
+  font-weight: 500; background: var(--accent); color: #fff;
+  transition: all 0.15s; margin-top: 6px; min-height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+.submitBtn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.terms { font-size: 11px; color: var(--tx-s); margin-top: 16px; line-height: 1.5; }
+.switch { font-size: 13px; color: var(--tx-m); margin-top: 22px; }
+.switch a { color: var(--accent); font-weight: 500; }
+.switch a:hover { text-decoration: underline; }
