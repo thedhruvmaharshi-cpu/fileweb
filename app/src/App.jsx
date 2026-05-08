@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -6,7 +5,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import BoardPlaceholder from "./pages/BoardPlaceholder";
+import Canvas from "./pages/Canvas";
 
 export default function App() {
   const { user } = useAuth();
@@ -16,7 +15,7 @@ export default function App() {
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <Signup />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/board/:boardId" element={<ProtectedRoute><BoardPlaceholder /></ProtectedRoute>} />
+      <Route path="/board/:boardId" element={<ProtectedRoute><Canvas /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
