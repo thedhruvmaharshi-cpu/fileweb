@@ -171,24 +171,102 @@ export default function Canvas() {
   }, [boardId]);
 
   // ─── Auto-connect ───
-  useEffect(() => {
-    if (loading || items.length === 0) return;
-    const fileType = (i) => i.type !== "person" && i.type !== "channel" && i.type !== "sticky" && i.type !== "text";
-    const need = items.filter(i => !i.autoConnected && fileType(i) && (i.sender || i.channel));
-    if (need.length === 0) return;
-    const fileItems = items.filter(fileType);
-    (async () => {
-      const batch = writeBatch(db);
-      need.forEach(item => {
-        const peers = fileItems
-          .filter(o => o.id !== item.id && ((o.sender && o.sender === item.sender) || (o.channel && o.channel === item.channel)))
-          .map(o => o.id);
-        const merged = Array.from(new Set([...(item.connectedTo || []), ...peers]));
-        batch.update(doc(db, "boards", boardId, "items", item.id), { connectedTo: merged, autoConnected: true });
+const autoArrange = async () => {
+  const fileType = (i) => i.type !== "person" && i.type !== "channel" && i.type !== "sticky" && i.type !== "text";
+  const fileItems = items.filter(fileType);
+  const existingPeople = items.filter(i => i.type === "person");
+
+  // Group files by sender
+  const groups = {};
+  fileItems.forEach(f => {
+    const sender = f.sender || "Unknown";
+    if (!groups[sender]) groups[sender] = [];
+    groups[sender].push(f);
+  });
+
+  const senderNames = Object.keys(groups).filter(s => s !== "Unknown");
+  if (senderNames.length === 0 && groups["Unknown"]?.length === 0) {
+    showToast("Nothing to arrange");
+    return;
+  }
+
+  const batch = writeBatch(db);
+  const COLS = Math.max(2, Math.ceil(Math.sqrt(senderNames.length)));
+  const CLUSTER_W = 460;
+  const CLUSTER_H = 380;
+  const colors = ["108,99,255", "78,205,196", "239,159,39", "232,89,60", "29,158,117", "236,72,153", "59,130,246", "139,133,255"];
+
+  senderNames.forEach((sender, idx) => {
+    const col = idx % COLS;
+    const row = Math.floor(idx / COLS);
+    const cx = 100 + col * CLUSTER_W;
+    const cy = 100 + row * CLUSTER_H;
+
+    // Find or create person node for this sender
+    let person = existingPeople.find(p => p.name === sender);
+    let personId;
+
+    if (person) {
+      personId = person.id;
+      batch.update(doc(db, "boards", boardId, "items", personId), {
+        x: cx, y: cy,
+        color: person.color || colors[idx % colors.length],
       });
-      try { await batch.commit(); } catch (e) { console.warn("Auto-connect failed:", e); }
-    })();
-  }, [items, loading, boardId]);
+    } else {
+      const newRef = doc(collection(db, "boards", boardId, "items"));
+      personId = newRef.id;
+      batch.set(newRef, {
+        type: "person",
+        name: sender,
+        color: colors[idx % colors.length],
+        x: cx, y: cy,
+        connectedTo: [],
+        ownerId: user.uid,
+        addedBy: "auto-arrange",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Position files in a grid around the person, connect each to person
+    const files = groups[sender];
+    const fcols = Math.ceil(Math.sqrt(files.length));
+    files.forEach((f, fIdx) => {
+      const fCol = fIdx % fcols;
+      const fRow = Math.floor(fIdx / fcols);
+      const fx = cx + 90 + fCol * 175;
+      const fy = cy - 30 + fRow * 115;
+      batch.update(doc(db, "boards", boardId, "items", f.id), {
+        x: fx, y: fy,
+        connectedTo: [personId],
+        autoConnected: true,
+      });
+    });
+  });
+
+  // Handle "Unknown" sender files - just lay them out in a grid with no connections
+  if (groups["Unknown"]) {
+    const startY = 100 + Math.ceil(senderNames.length / COLS) * CLUSTER_H;
+    groups["Unknown"].forEach((f, idx) => {
+      const c = idx % 5;
+      const r = Math.floor(idx / 5);
+      batch.update(doc(db, "boards", boardId, "items", f.id), {
+        x: 100 + c * 170,
+        y: startY + r * 115,
+        connectedTo: [],
+        autoConnected: true,
+      });
+    });
+  }
+
+  try {
+    await batch.commit();
+    showToast(`Arranged ${fileItems.length} files into ${senderNames.length} clusters`);
+    setViewport({ x: 0, y: 0, scale: 0.7 });
+  } catch (e) {
+    showToast("Arrange failed");
+    console.error(e);
+  }
+};
 
   // ─── Wheel zoom ───
   const handleWheel = useCallback((e) => {
@@ -617,6 +695,10 @@ const setConnectionColor = async (fromId, toId, rgb) => {
         <button className={styles.tBtn} onClick={addText} title="Text [T]"><i className="ti ti-text-size" /></button>
         <button className={styles.tBtn} onClick={addPerson} title="Add person"><i className="ti ti-user-plus" /></button>
         <button className={styles.tBtn} onClick={addChannel} title="Add channel"><i className="ti ti-hash" /></button>
+        <div className={styles.tDiv} />
+        <button className={styles.tBtn} onClick={autoArrange} title="Auto-arrange by sender">
+          <i className="ti ti-layout-grid" />
+        </button>
         <div className={styles.tDiv} />
         <button className={`${styles.tBtn} ${mode === "connect" ? styles.tBtnActive : ""}`}
           onClick={() => { const next = mode === "connect" ? "select" : "connect"; setMode(next); setConnectFromId(null); if (next === "connect") showToast("Click two nodes to connect"); }}

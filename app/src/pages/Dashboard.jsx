@@ -80,15 +80,13 @@ export default function Dashboard() {
             </button>
 
             <div className={styles.navLabel} style={{ marginTop: 16 }}>Connections</div>
-            <button className={styles.navItem}>
-              <i className="ti ti-brand-discord" />
-              Discord
-              <span className={styles.statusDot} />
-            </button>
-            <button className={styles.navItem} disabled>
-              <i className="ti ti-brand-google-drive" />
-              Google Drive
-              <span className={styles.soon}>Soon</span>
+             <button className={styles.navItem} onClick={() => navigate("/settings")}>
+  <i className="ti ti-brand-discord" />
+  Discord
+             </button>
+             <button className={styles.navItem} onClick={() => navigate("/settings")}>
+  <i className="ti ti-brand-google-drive" />
+  Google Drive
             </button>
           </nav>
         </div>
