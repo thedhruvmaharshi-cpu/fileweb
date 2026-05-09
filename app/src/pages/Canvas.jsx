@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Spinner from "../components/Spinner";
 import styles from "./Canvas.module.css";
+import ShareModal from "../components/ShareModal";
 
 // ───────────────────────────── Constants ─────────────────────────────
 
@@ -139,6 +140,7 @@ export default function Canvas() {
   const canvasRef = useRef(null);
   const localPositionsRef = useRef({});
   const panStateRef = useRef(null);
+  const [showShare, setShowShare] = useState(false);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -642,6 +644,9 @@ const setConnectionColor = async (fromId, toId, rgb) => {
           </div>
         </div>
         <div className={styles.hudRight}>
+          <button className={styles.shareBtn} onClick={() => setShowShare(true)} title="Share">
+            <i className="ti ti-user-plus" /> Share
+          </button>
           <button className={styles.iconBtn} onClick={toggleTheme}><i className={`ti ti-${theme === "dark" ? "sun" : "moon"}`} /></button>
         </div>
       </header>
@@ -730,8 +735,9 @@ const setConnectionColor = async (fromId, toId, rgb) => {
       )}
 
       {toast && <div className={styles.toast}>{toast}</div>}
+      {showShare && board && <ShareModal board={board} onClose={() => setShowShare(false)} />}
     </div>
-  );
+  ); 
 }
 
 // ───────────────────────────── Node ─────────────────────────────

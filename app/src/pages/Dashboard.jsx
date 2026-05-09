@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Spinner from "../components/Spinner";
 import styles from "./Dashboard.module.css";
+import ShareModal from "../components/ShareModal";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
+  const [shareBoard, setShareBoard] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, "boards"), where("members", "array-contains", user.uid));
@@ -160,24 +162,50 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className={styles.grid}>
-            {filteredBoards.map(board => (
-              <button
-                key={board.id} className={styles.boardCard}
-                onClick={() => navigate(`/board/${board.id}`)}
-              >
-                <div className={styles.boardCardTop}>
-                  <div className={`${styles.boardIcon} ${board.isInbox ? styles.boardIconInbox : ""}`}>
-                    <i className={`ti ${board.isInbox ? "ti-inbox" : "ti-layout-kanban"}`} />
-                  </div>
-                  {board.isInbox && <span className={styles.badge}>Inbox</span>}
-                </div>
-                <div className={styles.boardName}>{board.name}</div>
-                <div className={styles.boardMeta}>
-                  <span><i className="ti ti-users" /> {board.members?.length || 1}</span>
-                  <span><i className="ti ti-circle-dot" /> {board.ownerId === user.uid ? "Owner" : "Member"}</span>
-                </div>
-              </button>
-            ))}
+{filteredBoards.map(board => (
+  <div
+    key={board.id}
+    className={styles.boardCard}
+    onClick={() => navigate(`/board/${board.id}`)}
+    style={{ cursor: "pointer", position: "relative" }}
+  >
+    <button
+      onClick={(e) => { e.stopPropagation(); setShareBoard(board); }}
+      title="Share"
+      style={{
+        position: "absolute",
+        top: "12px",
+        right: "12px",
+        width: "30px",
+        height: "30px",
+        borderRadius: "8px",
+        background: "var(--surf)",
+        color: "var(--tx-m)",
+        fontSize: "14px",
+        border: "0.5px solid var(--bd)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 0,
+        zIndex: 5,
+      }}
+    >
+      <i className="ti ti-user-plus" />
+    </button>
+    <div className={styles.boardCardTop}>
+      <div className={`${styles.boardIcon} ${board.isInbox ? styles.boardIconInbox : ""}`}>
+        <i className={`ti ${board.isInbox ? "ti-inbox" : "ti-layout-kanban"}`} />
+      </div>
+      {board.isInbox && <span className={styles.badge} style={{ marginRight: "36px" }}>Inbox</span>}
+    </div>
+    <div className={styles.boardName}>{board.name}</div>
+    <div className={styles.boardMeta}>
+      <span><i className="ti ti-users" /> {board.members?.length || 1}</span>
+      <span><i className="ti ti-circle-dot" /> {board.ownerId === user.uid ? "Owner" : "Member"}</span>
+    </div>
+  </div>
+))}
           </div>
         )}
       </main>
@@ -209,6 +237,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      {shareBoard && <ShareModal board={shareBoard} onClose={() => setShareBoard(null)} />}
     </div>
   );
 }
